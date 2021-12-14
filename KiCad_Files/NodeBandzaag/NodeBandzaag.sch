@@ -5,8 +5,8 @@ $Descr A3 16535 11693
 encoding utf-8
 Sheet 1 1
 Title "Node Bandzaag"
-Date "2021-12-08"
-Rev "V0.1"
+Date "2021-12-14"
+Rev "V0.3"
 Comp "MakerSpace Leiden"
 Comment1 "Getekend door: Hans Beerman"
 Comment2 ""
@@ -1149,7 +1149,7 @@ L power:PWR_FLAG #FLG0101
 U 1 1 61D4F71F
 P 5750 1325
 F 0 "#FLG0101" H 5750 1400 50  0001 C CNN
-F 1 "PWR_FLAG" H 5750 1500 50  0000 C CNN
+F 1 "PWR_FLAG" H 5625 1500 50  0000 C CNN
 F 2 "" H 5750 1325 50  0001 C CNN
 F 3 "~" H 5750 1325 50  0001 C CNN
 	1    5750 1325
@@ -1193,7 +1193,7 @@ Text GLabel 10950 7975 2    50   Input ~ 0
 NoConn ~ 10950 7975
 Text GLabel 7825 8275 2    50   Output ~ 0
 Relay2
-Text GLabel 7825 8475 2    50   Output ~ 0
+Text GLabel 8925 4375 0    50   Input ~ 0
 FET1
 Text GLabel 7825 8575 2    50   Output ~ 0
 FET2
@@ -1201,7 +1201,6 @@ Text GLabel 7825 8375 2    50   Output ~ 0
 Relay3
 NoConn ~ 7825 8275
 NoConn ~ 7825 8375
-NoConn ~ 7825 8475
 NoConn ~ 7825 8575
 Text GLabel 7800 9075 2    50   Input ~ 0
 Switch1
@@ -1212,4 +1211,45 @@ Switch3
 NoConn ~ 7800 9075
 NoConn ~ 7800 9175
 NoConn ~ 7800 9275
+$Comp
+L Device:R R22
+U 1 1 61B66960
+P 9100 4625
+F 0 "R22" H 9170 4671 50  0000 L CNN
+F 1 "1k5" V 9100 4575 50  0000 L CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 9030 4625 50  0001 C CNN
+F 3 "~" H 9100 4625 50  0001 C CNN
+	1    9100 4625
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:LED D13
+U 1 1 61B68196
+P 9100 5100
+F 0 "D13" V 9139 4983 50  0000 R CNN
+F 1 "LED" V 9048 4983 50  0000 R CNN
+F 2 "LED_THT:LED_D3.0mm" H 9100 5100 50  0001 C CNN
+F 3 "~" H 9100 5100 50  0001 C CNN
+	1    9100 5100
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 61B68F30
+P 9100 5375
+F 0 "#PWR0102" H 9100 5125 50  0001 C CNN
+F 1 "GND" H 9105 5202 50  0000 C CNN
+F 2 "" H 9100 5375 50  0001 C CNN
+F 3 "" H 9100 5375 50  0001 C CNN
+	1    9100 5375
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8925 4375 9100 4375
+Wire Wire Line
+	9100 4375 9100 4475
+Wire Wire Line
+	9100 4775 9100 4950
+Wire Wire Line
+	9100 5250 9100 5375
 $EndSCHEMATC
