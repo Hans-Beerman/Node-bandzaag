@@ -66,7 +66,7 @@ Change .passwd.h in the /include directoy containing the following information
 */
 
 // software version
-#define SOFTWARE_VERSION "  V1.0.0.0 "
+#define SOFTWARE_VERSION "  V1.0.1.0 "
 
 #define MACHINE "lintzaag"
 
@@ -345,7 +345,7 @@ void setup() {
   Serial.println("Booted: " __FILE__ " " __DATE__ " " __TIME__ );
   
   setup_GPIO();
-
+  
   setup_MCP23017();
 
   relay1Off();
@@ -544,12 +544,12 @@ void optocoupler_loop() {
       Serial.print("OptoCoupler = on\n\r");
       previousOpto1IsOn = true;
     }
-    if (!opto1Error && (machinestate != ACTIVE) && (machinestate != POWERED)) {
-      FET1BlinkOn(BLINK_ERROR);
-      opto1Error = true;
-    }
   } else {
     opto1IsOn = false;
+    if (((machinestate == ACTIVE) || (machinestate == POWERED)) && previousOpto1IsOn) {
+      relay1Off();
+      machinestate = CLEARSTATUS;
+    }
     if (opto1Error) {
       if (!powerWhileSwitchedOffError) {
         FET1BlinkOff();
