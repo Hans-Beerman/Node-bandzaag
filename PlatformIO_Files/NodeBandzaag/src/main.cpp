@@ -66,7 +66,7 @@ Change .passwd.h in the /include directoy containing the following information
 */
 
 // software version
-#define SOFTWARE_VERSION "  V1.0.1.0 "
+#define SOFTWARE_VERSION "  V1.0.2.0 "
 
 #define MACHINE "lintzaag"
 
@@ -89,9 +89,12 @@ Change .passwd.h in the /include directoy containing the following information
 // for test
 // #define MAX_ACTIVE_TIME                         (1) // in minutes = 1 minute
 // for normal operation
-#define MAX_IDLE_TIME                           (35 * 60 * 1000) // auto power off after 35 minutes of no use.
+// #define MAX_IDLE_TIME                           (35 * 60 * 1000) // auto power off after 35 minutes of no use.
+#define MAX_IDLE_TIME                           (100 * 1000) // auto power off after 100 s of no use.
 // for test
 // #define MAX_IDLE_TIME                           (1 * 60 * 1000) // auto power off after 1 minute of no use.
+
+#define SWITCH_POWER_OFF_WAITTIME               (3000) // in ms
 
 #define CHECK_NFC_READER_AVAILABLE_TIME_WINDOW  (10000) // in ms  
 #define GPIOPORT_I2C_RECOVER_SWITCH             (15)       
@@ -116,6 +119,7 @@ bool opto1IsOn = false;
 bool previousOpto1IsOn = false;
 bool opto1Error = false;
 bool powerWhileSwitchedOffError = false;
+bool switchPowerOff = false;
 
 #ifdef WIFI_NETWORK
 ACNode node = ACNode(MACHINE, WIFI_NETWORK, WIFI_PASSWD);
@@ -202,6 +206,8 @@ struct {
 unsigned long laststatechange = 0, lastReport = 0;
 static machinestates_t laststate = OUTOFORDER;
 machinestates_t machinestate = BOOTING;
+
+unsigned long switchPowerOffTime = 0;
 
 // to handle onconnect only once (only after reboot)
 static bool firstOnConnectTime = true;
@@ -380,6 +386,7 @@ void setup() {
   currentSensor.setOnLimit(CURRENT_THRESHOLD);
   currentSensor.onCurrentOn([]() {
     Serial.println("CurrentSensor = on (current detected > 4A (Irms)!)\r");
+    switchPowerOff = false;
     if (machinestate < POWERED) {
       powerWhileSwitchedOffError = true;
       FET1BlinkOn(BLINK_ERROR);
@@ -387,7 +394,7 @@ void setup() {
     } else {
       if (machinestate != ACTIVE) {
         machinestate = ACTIVE;
-        Log.println("Motor started");
+        Log.println("Motor bandsaw started");
       };
     };
   });
@@ -540,15 +547,34 @@ void optocoupler_loop() {
 
   if (opto1.state() == OptoDebounce::ON) { 
     opto1IsOn = true;
+    switchPowerOff = false;
+    if ((machinestate != ACTIVE) && (machinestate != POWERED)) {
+      relay1Off();
+      if (!opto1Error) {
+        FET1BlinkOn(BLINK_ERROR);
+        opto1Error = true;
+        Log.println("Error: bandzaag is already powered! Must be manualy switched off first!");
+        Serial.print("Error: bandzaag is already powered! Must be manualy switched off first!\n\r");
+      }
+    }
     if (!previousOpto1IsOn) {
       Serial.print("OptoCoupler = on\n\r");
       previousOpto1IsOn = true;
     }
   } else {
     opto1IsOn = false;
-    if (((machinestate == ACTIVE) || (machinestate == POWERED)) && previousOpto1IsOn) {
-      relay1Off();
-      machinestate = CLEARSTATUS;
+    if ((machinestate == ACTIVE) || (machinestate == POWERED)) {
+      if (previousOpto1IsOn) {
+        switchPowerOff = true;
+        switchPowerOffTime = millis();
+      } else {
+        if (switchPowerOff && ((millis() - switchPowerOffTime) >= SWITCH_POWER_OFF_WAITTIME)) {
+          relay1Off();
+          switchPowerOff = false;
+          Serial.print("set machinestate = CLEARSTATUS (OptoCoupler = off\n\r");
+          machinestate = CLEARSTATUS;
+        } 
+      }
     }
     if (opto1Error) {
       if (!powerWhileSwitchedOffError) {
