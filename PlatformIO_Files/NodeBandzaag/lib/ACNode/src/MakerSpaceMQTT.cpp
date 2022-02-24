@@ -1,6 +1,6 @@
 #include <ACNode-private.h>
 
-#if MQTT_MAX_PACKET_SIZE < 340
+#if MQTT_MAX_PACKET_SIZE < 550
 #error "You will need to increase te MQTT_MAX_PACKET_SIZE size a bit in PubSubClient.h"
 #endif
 
@@ -26,8 +26,10 @@ void ACNode::send(const char * topic, const char * payload, bool _raw) {
     if (topic == NULL) {
         snprintf(_topic, sizeof(_topic), "%s/%s/%s", mqtt_topic_prefix, master, ACNode::moi);
         topic = _topic;
-    };
-
+    } else if (index(topic,'/') == NULL) {
+        snprintf(_topic, sizeof(_topic), "%s/%s/%s", mqtt_topic_prefix, ACNode::moi, topic);
+        topic = _topic;
+    }
 //    Serial.printf("send('%s','%s',%d)\n", topic ? topic : "<null>", payload ? payload : "<null>" , _raw);
 
     publish_rec_t * rec = (publish_rec_t *)malloc(sizeof(publish_rec_t));
@@ -132,9 +134,10 @@ void ACNode::reconnectMQTT() {
     if (!_client.connect(ACNode::moi)) {
         Log.print("Reconnect failed : ");
         Log.println(state2str(_client.state()));
-	return;
+	    return;
     }
-    
+    _client.loop();
+        
     Debug.println("(re)connected ");
     _mqtt_reconnects ++;
  
@@ -248,6 +251,7 @@ void ACNode::mqttLoop() {
     if (!isUp()) {
         // report transient error ? Which ? And how often ?
         if (millis() - last_mqtt_connect_try > 10000 || last_mqtt_connect_try == 0) {
+            Log.printf("Reconnect as MQTT is no longer up\n");
             reconnectMQTT();
             last_mqtt_connect_try = millis();
         }

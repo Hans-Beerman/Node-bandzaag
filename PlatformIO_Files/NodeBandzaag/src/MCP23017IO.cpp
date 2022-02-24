@@ -39,6 +39,7 @@ unsigned long FET1BlinkTime;
 unsigned long FET1BlinkStartTime;
 bool FET1BlinkIsOn = false;
 bool FET1BlinkFETIsOn = false;
+bool setupReady = false;
 
 void setup_MCP23017() {
     Wire.begin(RFID_SDA_PIN, RFID_SCL_PIN, RFID_I2C_FREQ);
@@ -47,9 +48,13 @@ void setup_MCP23017() {
     mcp.digitalWrite(RELAY1_OUTPUT, 0);
     mcp.pinMode(FET1_OUTPUT, OUTPUT);
     mcp.digitalWrite(FET1_OUTPUT, 0);
+    setupReady = true;
 }
 
 void relay1On() {
+    if (!setupReady) {
+        setup_MCP23017();
+    }
     if (!relay1IsOn) {
         mcp.digitalWrite(RELAY1_OUTPUT, 1);
         relay1IsOn = true;
@@ -57,6 +62,9 @@ void relay1On() {
 }
 
 void relay1Off() {
+    if (!setupReady) {
+        setup_MCP23017();
+    }
     if (relay1IsOn) {
         mcp.digitalWrite(RELAY1_OUTPUT, 0);
         relay1IsOn = false;
@@ -64,6 +72,9 @@ void relay1Off() {
 }
 
 void FET1On() {
+    if (!setupReady) {
+        setup_MCP23017();
+    }
     if (!FET1IsOn) {
         mcp.digitalWrite(FET1_OUTPUT, 1);
         FET1IsOn = true;
@@ -71,6 +82,9 @@ void FET1On() {
 }
 
 void FET1Off() {
+    if (!setupReady) {
+        setup_MCP23017();
+    }
     if (FET1IsOn) {
         mcp.digitalWrite(FET1_OUTPUT, 0);
         FET1IsOn = false;

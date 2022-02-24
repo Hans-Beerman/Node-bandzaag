@@ -158,10 +158,10 @@ void SIG2::begin() {
   load_eeprom();
 
   if (eeprom.version != EEPROM_VERSION) {
-    Serial.printf("EEPROM Version %04x not understood -- clearing.\n", eeprom.version );
+    Log.printf("EEPROM Version %04x not understood -- clearing.\n", eeprom.version );
     wipe_eeprom();
   }
-  Serial.println("Got a valid eeprom.");
+  Log.println("Got a valid eeprom.");
   Beat::begin();
 }
 
@@ -649,14 +649,14 @@ SIG2::acauth_result_t SIG2::helo(ACRequest * req) {
   //
   strncat(buff, " ", sizeof(buff));
   encode_base64((unsigned char *)(node_publicsession), sizeof(node_publicsession), (unsigned char *)b64);
-  strncat(buff, b64, sizeof(buff));
+  strncat(buff, b64, sizeof(buff) - 1);
 
   // Add a nonce - so we can time-point the reply.
   //
   populate_nonce(NULL,_nonce);
 
-  strncat(buff, " ", sizeof(buff));
-  strncat(buff, _nonce, sizeof(buff));
+  strncat(buff, " ", sizeof(buff) - 1);
+  strncat(buff, _nonce, sizeof(buff) - 1);
 
   strncpy(req->payload, buff, sizeof(req->payload));
   return OK;

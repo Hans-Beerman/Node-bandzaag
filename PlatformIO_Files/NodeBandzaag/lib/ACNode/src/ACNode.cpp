@@ -456,9 +456,13 @@ void ACNode::loop() {
     bool connectedstate = isConnected();
     if (lastconnectedstate != connectedstate) {
         if (connectedstate) {
-            _connect_callback();
+            if (_connect_callback) {
+                _connect_callback();
+            }
 	    } else {
-            _disconnect_callback();
+            if (_disconnect_callback) {
+                _disconnect_callback();
+            }
 	    };
         lastconnectedstate = connectedstate;
     };
@@ -667,7 +671,7 @@ void ACNode::delayedReboot() {
         ESP.restart();
    };
 
-   char buff[255];
+   char buff[MAX_MSG];
    snprintf(buff,sizeof(buff),"Countdown to forced reboot: %d", 5 - warn_counter);
 
    Log.println(buff);

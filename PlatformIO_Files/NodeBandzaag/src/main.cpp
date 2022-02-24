@@ -66,7 +66,7 @@ Change .passwd.h in the /include directoy containing the following information
 */
 
 // software version
-#define SOFTWARE_VERSION "  V1.0.2.0 "
+#define SOFTWARE_VERSION "  V1.0.4.0 "
 
 #define MACHINE "lintzaag"
 
@@ -342,7 +342,7 @@ void initNTP(void) {
 
   getCurrentNTPDateTime();
 
-  snprintf(ntpBootDateTimeStr, sizeof(ntpBootDateTimeStr), "Last boot: %s", ntpCurrentDateTimeStr);
+  snprintf(ntpBootDateTimeStr, sizeof(ntpBootDateTimeStr), "%s", ntpCurrentDateTimeStr);
 }
 
 void setup() {
@@ -467,6 +467,7 @@ void setup() {
     theLocalIPAddress = node.localIP();
     report["IP_address"] = theLocalIPAddress.toString();
     report["Last_Reboot"] = ntpBootDateTimeStr;
+    report["Software_Version"] = SOFTWARE_VERSION;
   });
 
   reader.onSwipe([](const char * tag) -> ACBase::cmd_result_t {
